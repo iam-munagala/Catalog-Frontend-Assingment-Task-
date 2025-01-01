@@ -140,6 +140,7 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
           ))}
         </div>
       </div>
+      
       <canvas id="chartCanvas"></canvas>
     </div>
   );
