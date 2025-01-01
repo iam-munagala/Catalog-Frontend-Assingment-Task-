@@ -1,102 +1,174 @@
+@font-face {
+  font-family: 'Circular Std';
+  src:  url('../assets/fonts/fonts.ttf') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Global Styles */
 .app-container {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f5f5f5;
-    margin: 0;
-  }
-  
-  .content-box {
-    background: white;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 800px;
-    padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  /* Header */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 10px;
-  }
-  
-  .price-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .price {
-    display: flex;
-    flex-direction: column;
-    font-size: 28px;
-    font-weight: bold;
-  }
-  
-  .price small {
-    font-size: 12px;
-    color: gray;
-    align-self: flex-end;
-    margin-left: 5px;
-  }
-  
-  .percentage-change {
-    font-size: 18px;
-    font-weight: bold;
-    margin-left: auto;
-  }
-  
-  /* Tabs */
-  .tabs-container {
-    display: flex;
-    justify-content: flex-start;
-    gap: 15px;
-    margin: 20px 0;
-  }
-  
-  .tabs-container button {
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .tabs-container .active {
-    border-bottom: 2px solid #3b82f6;
-  }
-  
-  /* Chart Container */
-  .chart-container {
-    position: relative;
-    width: 100%;
-    height: 400px;
-  }
-  
-  .chart-container canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-  
-  .chart-container.fullscreen {
-    width: 100%;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-  }
-  
+  font-family: 'Circular Std', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  margin: 0;
+}
+
+.content-box {
+  background: white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Header */
+.price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  margin: 20px 0px; /* Center the price box */
+}
+
+.price-header {
+  display: flex;
+  align-items: left; /* Align price and currency */
+  gap: 8px;
+}
+
+.price-value {
+  font-family: sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: #000;
+}
+
+.price-currency {
+  font-family:'Circular Std', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #888;
+}
+
+.price-change {
+  font-family: 'Circular Std', sans-serif;
+  font-size: 16px;
+  color: green;
+  margin-top: 10px;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.tabs-container button {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #7f7f7f; /* Light color for inactive buttons */
+}
+
+.tabs-container .active {
+  border-bottom: 2px solid #3b82f6;
+  color: black; /* Dark color for active (Chart) */
+}
+
+.tabs-container .inactive:hover {
+  color: #333; /* Slightly darken the color on hover */
+}
+
+/* Chart Container */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden; /* Prevents the chart from overflowing */
+}
+
+.chart-container.fullscreen {
+  width: 100%;
+  height: 100vh; /* Full height of the viewport in fullscreen */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.chart-controls .fullscreen-btn {
+  padding: 6px 12px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.chart-controls .fullscreen-btn:hover {
+  background-color: #2563eb;
+}
+
+.chart-controls .time-range-buttons {
+  display: flex;
+  gap: 10px; /* 10px gap between each time range button */
+  margin-left: 10px; /* Ensures some space before the time range buttons */
+}
+
+.chart-controls .time-range-btn {
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.chart-controls .time-range-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* Fullscreen Mode for the Entire App */
+body.fullscreen, .app-container.fullscreen {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures layout stretches */
+}
+
+.app-container.fullscreen .content-box {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-shadow: none; /* Optional: remove the box shadow in fullscreen */
+}
+
+.content-box.fullscreen {
+  padding: 10px; /* Less padding for a more compact layout when in fullscreen */
+}
+
+/* Optional: Style for any additional elements in fullscreen mode */
+body.fullscreen {
+  overflow: hidden; /* Prevent body from scrolling when in fullscreen */
+}

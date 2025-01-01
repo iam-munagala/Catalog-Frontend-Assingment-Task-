@@ -3,11 +3,11 @@ import React from 'react';
 const Tabs = () => {
   return (
     <div className="tabs-container">
-      <button >Summary</button>
+      <button className="inactive">Summary</button>
       <button className="active">Chart</button>
-      <button>Statistics</button>
-      <button>Analysis</button>
-      <button>Settings</button>
+      <button className="inactive">Statistics</button>
+      <button className="inactive">Analysis</button>
+      <button className="inactive">Settings</button>
     </div>
   );
 };

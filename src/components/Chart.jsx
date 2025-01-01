@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';
+import { Chart as ChartJS, LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+
+// Register necessary components including PointElement for "points" in the line chart
+ChartJS.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
   const [chartData, setChartData] = useState(null);
@@ -36,6 +39,7 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59, 130, 246, 0.2)',
             tension: 0.4,
+            pointRadius: 0, // No points displayed
           },
         ],
       });
@@ -52,7 +56,7 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
         chartRef.current.destroy();
       }
 
-      chartRef.current = new Chart(ctx, {
+      chartRef.current = new ChartJS(ctx, {
         type: 'line',
         data: chartData,
         options: {
@@ -65,18 +69,18 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
           scales: {
             x: {
               ticks: {
-                display: false,
+                display: false, // Hide numbers on X-axis
               },
               grid: {
-                display: false,
+                display: false, // Remove grid lines from X-axis
               },
             },
             y: {
               ticks: {
-                display: false,
+                display: false, // Hide numbers on Y-axis
               },
               grid: {
-                display: false,
+                display: false, // Remove grid lines from Y-axis
               },
             },
           },
@@ -93,6 +97,13 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+    if (isFullscreen) {
+      // Exit fullscreen: remove the fullscreen class from the body
+      document.body.classList.remove('fullscreen');
+    } else {
+      // Enter fullscreen: add the fullscreen class to the body
+      document.body.classList.add('fullscreen');
+    }
   };
 
   const mapTimeRange = (range) => {
@@ -117,14 +128,17 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
   return (
     <div className={`chart-container ${isFullscreen ? 'fullscreen' : ''}`}>
       <div className="chart-controls">
-        <button onClick={toggleFullscreen}>
+        <button onClick={toggleFullscreen} className="fullscreen-btn">
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
-        {['1d', '3d', '1w', '6m', '1y', 'max'].map((range) => (
-          <button key={range} onClick={() => setTimeRange(mapTimeRange(range))}>
-            {range}
-          </button>
-        ))}
+
+        <div className="time-range-buttons">
+          {['1d', '3d', '1w', '6m', '1y', 'max'].map((range) => (
+            <button key={range} onClick={() => setTimeRange(mapTimeRange(range))} className="time-range-btn">
+              {range}
+            </button>
+          ))}
+        </div>
       </div>
       <canvas id="chartCanvas"></canvas>
     </div>
