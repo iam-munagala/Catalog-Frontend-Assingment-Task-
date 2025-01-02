@@ -1,108 +1,185 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Chart as ChartJS, LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
-import { IoIosResize } from 'react-icons/io';
-import { IoIosAddCircleOutline } from 'react-icons/io';
+import Highcharts from 'highcharts/highstock';
+import HighchartsReact from 'highcharts-react-official';
 
-ChartJS.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
-
-const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
-  const [chartData, setChartData] = useState(null);
-  const [timeRange, setTimeRange] = useState('7');
+const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }) => {
+  const [chartOptions, setChartOptions] = useState({});
+  const [timeRange, setTimeRange] = useState('1');  // Default set to '1' day
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const chartContainerRef = useRef();
   const chartRef = useRef(null);
+  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
     fetchChartData(timeRange);
+
+    const id = setInterval(() => fetchRealTimeData(), 10000); 
+    setIntervalId(id);
+
+    return () => {
+      clearInterval(id);
+    };
   }, [timeRange]);
+
+  const convertToIST = (timestamp) => {
+    return timestamp + 5.5 * 60 * 60 * 1000;  // Convert to IST time
+  };
 
   const fetchChartData = async (range) => {
     try {
-      const response = await fetch(
+      // Fetch Bitcoin data
+      const btcResponse = await fetch(
         `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${range}`
       );
-      const data = await response.json();
-      const labels = data.prices.map(() => '');
-      const prices = data.prices.map((price) => price[1]);
+      const btcData = await btcResponse.json();
+      const btcPrices = btcData.prices.map(([timestamp, price]) => [
+        convertToIST(timestamp),
+        price
+      ]);
 
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
+      const minBtcPrice = Math.min(...btcPrices.map(([_, price]) => price));
+      const maxBtcPrice = Math.max(...btcPrices.map(([_, price]) => price));
 
-      setCurrentPrice(maxPrice.toFixed(2));
-      setPercentageChange(
-        (((maxPrice - minPrice) / minPrice) * 100).toFixed(2)
-      );
+      setCurrentPrice(maxBtcPrice.toFixed(2));
 
-      setChartData({
-        labels,
-        datasets: [
-          {
-            data: prices,
-            borderColor: '#9b59b6',
-            backgroundColor: 'rgba(24, 13, 176, 0.2)', 
-            tension: 0.4,
-            pointRadius: 0, 
+      // Calculate the absolute price change and percentage change
+      const priceChange = (maxBtcPrice - minBtcPrice).toFixed(2);
+      setPriceChange(priceChange);  // Absolute price change
+
+      const percentageChange = (((maxBtcPrice - minBtcPrice) / minBtcPrice) * 100).toFixed(2);
+      setPercentageChange(percentageChange);  // Percentage change
+
+      const series = [
+        {
+          name: 'BTC Price',
+          data: btcPrices,
+          type: 'area',
+          tooltip: {
+            valueDecimals: 2,
+            valuePrefix: '$',
           },
-        ],
+          color: '#1E90FF',
+          fillColor: {
+            linearGradient: {
+              x1: 0,
+              y1: 0,
+              x2: 0,
+              y2: 1,
+            },
+            stops: [
+              [0, '#1E90FF'],
+              [1, Highcharts.color('#1E90FF').setOpacity(0).get('rgba')],
+            ],
+          },
+          threshold: null,
+        },
+      ];
+
+      // If in compare mode, add ETH data
+      if (isCompareMode) {
+        const ethResponse = await fetch(
+          `https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=${range}`
+        );
+        const ethData = await ethResponse.json();
+        const ethPrices = ethData.prices.map(([timestamp, price]) => [
+          convertToIST(timestamp),
+          price,
+        ]);
+
+        series.push({
+          name: 'ETH Price',
+          data: ethPrices,
+          type: 'area',
+          tooltip: {
+            valueDecimals: 2,
+            valuePrefix: '$',
+          },
+          color: '#FF6347',
+          fillColor: {
+            linearGradient: {
+              x1: 0,
+              y1: 0,
+              x2: 0,
+              y2: 1,
+            },
+            stops: [
+              [0, '#FF6347'],
+              [1, Highcharts.color('#FF6347').setOpacity(0).get('rgba')],
+            ],
+          },
+          threshold: null,
+        });
+      }
+
+      setChartOptions({
+        xAxis: {
+          type: 'datetime',
+          ordinal: false,
+        },
+        yAxis: {
+          title: {
+            text: 'Price (USD)',
+          },
+        },
+        rangeSelector: {
+          selected: 1,
+        },
+        series: series,
+        scrollbar: {
+          enabled: false,
+        },
       });
     } catch (error) {
       console.error('Error fetching chart data:', error);
     }
   };
 
-  useEffect(() => {
-    if (chartData) {
-      const ctx = document.getElementById('chartCanvas').getContext('2d');
+  const fetchRealTimeData = async () => {
+    try {
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1`
+      );
+      const data = await response.json();
+      const latestPrice = data.prices[data.prices.length - 1];
+      const timestamp = latestPrice[0];
+      const price = latestPrice[1];
+
+      const timestampInIST = convertToIST(timestamp);
 
       if (chartRef.current) {
-        chartRef.current.destroy();
+        const chart = chartRef.current.chart;
+        chart.series[0].addPoint([timestampInIST, price], true, true);
+
+        setCurrentPrice(price.toFixed(2));
+
+        // Update price change and percentage dynamically
+        const minPrice = Math.min(...chart.series[0].data.map((point) => point.y));
+        const maxPrice = Math.max(...chart.series[0].data.map((point) => point.y));
+        const updatedPriceChange = (maxPrice - minPrice).toFixed(2);
+        setPriceChange(updatedPriceChange);
+
+        const updatedPercentageChange = (((maxPrice - minPrice) / minPrice) * 100).toFixed(2);
+        setPercentageChange(updatedPercentageChange);
       }
-
-      chartRef.current = new ChartJS(ctx, {
-        type: 'line',
-        data: chartData,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              enabled: true, 
-              callbacks: {
-                label: function (tooltipItem) {
-                  const value = tooltipItem.raw; 
-                  return `$${value.toFixed(2)}`; 
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              ticks: {
-                display: false,
-              },
-              grid: {
-                display: false, 
-              },
-            },
-            y: {
-              ticks: {
-                display: false, 
-              },
-              grid: {
-                display: false,
-              },
-            },
-          },
-        },
-      });
-
-      return () => {
-        if (chartRef.current) {
-          chartRef.current.destroy();
-        }
-      };
+    } catch (error) {
+      console.error('Error fetching real-time data:', error);
     }
-  }, [chartData]);
+  };
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      chartContainerRef.current.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const toggleCompareMode = () => {
+    setIsCompareMode(!isCompareMode); 
+    fetchChartData(timeRange);
+  };
 
   const mapTimeRange = (range) => {
     switch (range) {
@@ -119,22 +196,29 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
       case 'max':
         return 'max';
       default:
-        return '7';
+        return '1';
     }
   };
 
   return (
-    <div className="chart-container">
+    <div
+      ref={chartContainerRef}
+      className={`chart-container ${isFullscreen ? 'fullscreen' : ''}`}
+    >
       <div className="chart-controls">
-        <IoIosResize style={{ marginRight: '10px' }} /> 
-        <button className="fullscreen-btn" title="Enable fullscreen mode">
-          <span className="rotate-arrow">
-            
-          </span>
-          Fullscreen
+        <button
+          className="fullscreen-btn"
+          onClick={toggleFullscreen}
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
-        <IoIosAddCircleOutline style={{ marginRight: '10px' }} /> 
-        <button className="compare-btn" title="Compare with other coins">
+   
+        <button
+          className="compare-btn"
+          onClick={toggleCompareMode}
+          title="Compare Bitcoin with Ethereum"
+        >
           Compare
         </button>
         <div className="time-range-buttons">
@@ -143,14 +227,18 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
               key={range}
               onClick={() => setTimeRange(mapTimeRange(range))}
               className="time-range-btn"
-              title={`Select ${range} range`} 
             >
               {range}
             </button>
           ))}
         </div>
       </div>
-      <canvas id="chartCanvas"></canvas>
+      <HighchartsReact
+        highcharts={Highcharts}
+        constructorType={'stockChart'}
+        options={chartOptions}
+        ref={chartRef} 
+      />
     </div>
   );
 };
