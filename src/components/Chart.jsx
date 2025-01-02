@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
-
+import { IoIosAddCircleOutline } from "react-icons/io";
+import { IoIosResize } from "react-icons/io";
 const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }) => {
   const [chartOptions, setChartOptions] = useState({});
   const [timeRange, setTimeRange] = useState('1');  // Default set to '1' day
@@ -59,7 +60,7 @@ const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }
             valueDecimals: 2,
             valuePrefix: '$',
           },
-          color: '#1E90FF',
+          color: '#4B40EE',
           fillColor: {
             linearGradient: {
               x1: 0,
@@ -68,8 +69,8 @@ const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }
               y2: 1,
             },
             stops: [
-              [0, '#1E90FF'],
-              [1, Highcharts.color('#1E90FF').setOpacity(0).get('rgba')],
+              [0, '#4B40EE'],
+              [1, Highcharts.color('#4B40EE').setOpacity(0).get('rgba')],
             ],
           },
           threshold: null,
@@ -113,22 +114,36 @@ const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }
       }
 
       setChartOptions({
+        chart: {
+          type: 'area',  // Use area chart type for the main chart
+        },
         xAxis: {
           type: 'datetime',
           ordinal: false,
+          labels: {
+            enabled: false,  // Disable time labels on x-axis
+          },
+          title: {
+            text: '',  // Remove x-axis title
+          },
+          gridLineWidth: 0,  // Optional: Remove grid lines for a cleaner look
         },
         yAxis: {
           title: {
             text: 'Price (USD)',
           },
         },
+        // Disable navigator and rangeSelector to remove the secondary chart (mini-graph)
+        navigator: {
+          enabled: false, // Disable the mini graph navigator at the bottom
+        },
         rangeSelector: {
-          selected: 1,
+          enabled: false, // Disable the range selector at the top
+        },
+        scrollbar: { 
+          enabled: false,  // Disable scrollbar if it's causing the mini chart
         },
         series: series,
-        scrollbar: {
-          enabled: false,
-        },
       });
     } catch (error) {
       console.error('Error fetching chart data:', error);
@@ -206,6 +221,8 @@ const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }
       className={`chart-container ${isFullscreen ? 'fullscreen' : ''}`}
     >
       <div className="chart-controls">
+      <IoIosResize  style={{margin:'5px'}}/>
+
         <button
           className="fullscreen-btn"
           onClick={toggleFullscreen}
@@ -213,7 +230,7 @@ const ChartComponent = ({ setCurrentPrice, setPriceChange, setPercentageChange }
         >
           {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
         </button>
-   
+        <IoIosAddCircleOutline style={{ margin: '5px' }} />
         <button
           className="compare-btn"
           onClick={toggleCompareMode}
