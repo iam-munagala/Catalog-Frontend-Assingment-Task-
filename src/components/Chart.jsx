@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Chart as ChartJS, LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend } from 'chart.js';
+import { IoIosResize } from 'react-icons/io';
+import { IoIosAddCircleOutline } from 'react-icons/io';
 
-// Register necessary components including PointElement for "points" in the line chart
 ChartJS.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
@@ -35,10 +36,10 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
         datasets: [
           {
             data: prices,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderColor: '#9b59b6',
+            backgroundColor: 'rgba(24, 13, 176, 0.2)', 
             tension: 0.4,
-            pointRadius: 0, // No points displayed
+            pointRadius: 0, 
           },
         ],
       });
@@ -64,22 +65,31 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
             legend: {
               display: false,
             },
+            tooltip: {
+              enabled: true, 
+              callbacks: {
+                label: function (tooltipItem) {
+                  const value = tooltipItem.raw; 
+                  return `$${value.toFixed(2)}`; 
+                },
+              },
+            },
           },
           scales: {
             x: {
               ticks: {
-                display: false, // Hide numbers on X-axis
+                display: false,
               },
               grid: {
-                display: false, // Remove grid lines from X-axis
+                display: false, 
               },
             },
             y: {
               ticks: {
-                display: false, // Hide numbers on Y-axis
+                display: false, 
               },
               grid: {
-                display: false, // Remove grid lines from Y-axis
+                display: false,
               },
             },
           },
@@ -116,15 +126,25 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
   return (
     <div className="chart-container">
       <div className="chart-controls">
-        <button className="fullscreen-btn">
+        <IoIosResize style={{ marginRight: '10px' }} /> 
+        <button className="fullscreen-btn" title="Enable fullscreen mode">
+          <span className="rotate-arrow">
+            
+          </span>
           Fullscreen
         </button>
-        <button className="compare-btn">
+        <IoIosAddCircleOutline style={{ marginRight: '10px' }} /> 
+        <button className="compare-btn" title="Compare with other coins">
           Compare
         </button>
         <div className="time-range-buttons">
           {['1d', '3d', '1w', '6m', '1y', 'max'].map((range) => (
-            <button key={range} onClick={() => setTimeRange(mapTimeRange(range))} className="time-range-btn">
+            <button
+              key={range}
+              onClick={() => setTimeRange(mapTimeRange(range))}
+              className="time-range-btn"
+              title={`Select ${range} range`} 
+            >
               {range}
             </button>
           ))}

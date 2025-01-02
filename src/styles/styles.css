@@ -1,3 +1,4 @@
+/* Global Styles */
 @font-face {
   font-family: 'Circular Std';
   src: url('../assets/fonts/circular-std-medium-500.ttf') format('woff');
@@ -5,7 +6,6 @@
   font-style: normal;
 }
 
-/* Global Styles */
 .app-container {
   font-family: 'Circular Std', sans-serif;
   display: flex;
@@ -124,7 +124,7 @@
   border: 1px solid #ccc;
   cursor: pointer;
   border-radius: 4px;
-  margin-right: 10px;
+  margin-right: 10px; 
 }
 
 .chart-controls .fullscreen-btn:hover,
@@ -132,9 +132,11 @@
   background-color: #e0e0e0;
 }
 
+/* New CSS for the right-aligned buttons */
 .chart-controls .time-range-buttons {
   display: flex;
   gap: 10px;
+  margin-left: auto;  /* This moves the time-range buttons to the right */
 }
 
 .chart-controls .time-range-btn {
@@ -146,10 +148,16 @@
 }
 
 .chart-controls .time-range-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #9b59b6; 
+  color: white;
 }
 
-/* Fullscreen Mode for the Entire App */
+.chart-controls .time-range-btn.active {
+  background-color: #9b59b6;
+  color: white;
+}
+
+
 body.fullscreen,
 .app-container.fullscreen {
   height: 100%;
@@ -174,3 +182,22 @@ body.fullscreen {
   overflow: hidden;
 }
 
+
+.chart-container canvas {
+  background-color: transparent;
+}
+
+
+.chart-controls .time-range-btn {
+  padding: 6px 12px;
+  background-color: transparent;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+
+.chart-container {
+  margin-top: 20px;
+  padding: 20px;
+}
