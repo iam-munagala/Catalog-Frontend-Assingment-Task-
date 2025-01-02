@@ -6,7 +6,6 @@ ChartJS.register(LineController, LineElement, PointElement, CategoryScale, Linea
 
 const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
   const [chartData, setChartData] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [timeRange, setTimeRange] = useState('7');
   const chartRef = useRef(null);
 
@@ -95,17 +94,6 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
     }
   }, [chartData]);
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    if (isFullscreen) {
-      // Exit fullscreen: remove the fullscreen class from the body
-      document.body.classList.remove('fullscreen');
-    } else {
-      // Enter fullscreen: add the fullscreen class to the body
-      document.body.classList.add('fullscreen');
-    }
-  };
-
   const mapTimeRange = (range) => {
     switch (range) {
       case '1d':
@@ -126,12 +114,14 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
   };
 
   return (
-    <div className={`chart-container ${isFullscreen ? 'fullscreen' : ''}`}>
+    <div className="chart-container">
       <div className="chart-controls">
-        <button onClick={toggleFullscreen} className="fullscreen-btn">
-          {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+        <button className="fullscreen-btn">
+          Fullscreen
         </button>
-
+        <button className="compare-btn">
+          Compare
+        </button>
         <div className="time-range-buttons">
           {['1d', '3d', '1w', '6m', '1y', 'max'].map((range) => (
             <button key={range} onClick={() => setTimeRange(mapTimeRange(range))} className="time-range-btn">
@@ -140,7 +130,6 @@ const ChartComponent = ({ setCurrentPrice, setPercentageChange }) => {
           ))}
         </div>
       </div>
-      
       <canvas id="chartCanvas"></canvas>
     </div>
   );
